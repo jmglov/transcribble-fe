@@ -43,6 +43,132 @@
 
 <body>
 
+<div class="topbar inputting">
+  <img id="logo" src="/img/transcribble.png" />
+  <div class="title active">
+    Transcrible
+  </div>
+
+  <div class="controls">
+    <div class="controls">
+      <div class="button play-pause">
+        <i class="fa fa-play"></i><i class="fa fa-pause"></i>
+        <div class="topbar-button-shortcut" data-shortcut="playPause"></div>
+      </div>
+      <div class="button skip-backwards">
+        <i class="fa fa-backward"></i>
+        <div class="topbar-button-shortcut" data-shortcut="backwards"></div>
+      </div>
+      <div class="button skip-forwards">
+        <i class="fa fa-forward"></i>
+        <div class="topbar-button-shortcut" data-shortcut="forwards"></div>
+      </div>
+      <div class="button speed"><i class="fa fa-dashboard"></i> <span>speed</span>
+        <div class="speed-box">
+          <span data-shortcut="speedDown"></span>
+          <i class="slider-origin"></i>
+          <input class="speed-slider" type ="range" min ="0.5" max="2.0" step ="0.25" value ="1"/>
+          <span data-shortcut="speedUp"></span>
+        </div>
+      </div>
+      <div id="player-hook"></div>
+      <div class="button player-time"></div>
+      <div class="time-selection">
+        <label>
+          <span>Jump to time:</span>
+          <input type="text" value="0:00" class="mousetrap" />
+        </label>
+      </div>
+      <div class="button reset"><i class="fa fa-refresh"></i></div>
+    </div>
+  </div>
+
+  <a class="help-title" href="https://github.com/jmglov/transcribble-fe" target="_blank">
+    Help
+  </a>
+
+  <div class="settings-button">
+    <img id="settings" src="/img/settings.png" />
+  </div>
+</div>
+
+<div class="textbox-container">
+  <div class="input active">
+    <div class="file-input-outer">
+      <div class="file-input-wrapper"
+        style="position: relative; overflow: hidden;">
+        <button class="btn-file-input" style="width: 100%;">
+        <div id="choose-file"><img src="/img/upload.png" /></div>
+          Choose audio or video file
+        </button>
+        <input id="file-picker" type="file" accept="audio/*, video/*"
+          style="position: absolute; top: 0; left: 0; opacity: 0; width: 100%;">
+      </div>
+    </div>
+    <div id="lastfile"></div>
+    <div id="formats"></div>
+  </div>
+
+  <div class="message-panel hidden">
+    <div class="close-message-panel"><i class="fa fa-times"></i></div>
+    <div class="message-content"></div>
+  </div>
+
+  <div id="textbox"  class="mousetrap" contenteditable="true">
+    <p>Enter your transcript here...</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>Protips:</p>
+    <p>&nbsp;</p>
+    <p>- <em>Ctrl+I</em> adds <em>italic</em> formatting and <b>Ctrl+B</b> adds <b>bold</b> formatting.</p>
+    <p>- Press ESC to play/pause, and Ctrl+J to insert the current timestamp.<p>
+  </div>
+
+  <div class="text-panel">
+    <button class="sbutton bold" onclick="document.execCommand('bold',false,null);">
+      <i class="fa fa-bold" id="icon-b"></i><span class="label" data-shortcut="bold">ctrl+b</span>
+    </button>
+    <button class="sbutton italic" onclick="document.execCommand('italic',false,null);">
+      <i class="fa fa-italic" id="icon-i"></i><span class="label" data-shortcut="italic">ctrl+i</span>
+    </button>
+    <button class="sbutton time" onclick="window.insertTimestamp();">
+      <i class="fa fa-clock-o"></i><span class="label" data-shortcut="addTimestamp">ctrl+j</span>
+    </button>
+    <div class="wordcount">
+      <span class="wc-text">words</span>
+    </div>
+    <button class="sbutton backup">
+      <i class="fa fa-history"></i><span class="label">history</span>
+    </button>
+    <div class="import-file-wrapper">
+      <button class="sbutton import">
+        <i class="fa fa-sign-in" id="icon-imp"></i><span class="label">Import</span>
+      </button>
+      <input id="local-file-import" type="file" name="file" accept=".otr"  />
+    </div>
+    <button class="sbutton export">
+      <i class="fa fa-share-square-o" id="icon-exp"></i><span class="label">Export</span>
+    </button>
+  </div>
+
+  <div class="export-panel">
+    <div class="export-title">Download transcript as...</div>
+    <a class="export-block-edn" id="x-edn" target="_blank">Transcribble format (.edn)</a>
+    <a class="export-block-md" id="x-md" target="_blank">Markdown (.md)</a>
+    <a class="export-block-txt" id="x-txt" target="_blank">Plain text (.txt)</a>
+    <a class="export-block-otr" id="x-otr" target="_blank">oTranscribe format (.otr)</a>
+  </div>
+
+  <div class="backup-panel">
+    <div class="backup-description">
+      <div class="backup-close"><i class="fa fa-times"></i></div>
+      <div class="backup-title">Transcript history</div>
+      <div class="backup-instructions">A copy of your work is saved every five minutes. Backups are not stored for very long. Press Ctrl+S to save at any time.</div>
+    </div>
+    <div class="backup-window"><!-- backup blocks go here --></div>
+  </div>
+</div>
+
 </body>
 
 </html>
