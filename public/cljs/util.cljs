@@ -11,14 +11,5 @@
                (map clj->js)))
    obj))
 
-(comment
-
-  (log "foo")
-
-  (log "some stuff"
-       {:a "b"}
-       ["c" "d"]
-       #{:e :f}
-       (js/document.createElement "audio"))
-
-  )
+(defn now []
+  (-> (js/Date.) (.getTime)))

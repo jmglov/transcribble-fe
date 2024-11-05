@@ -8,16 +8,14 @@
 
 (defn log [f k msg & vs]
   (apply util/log
-         (str "storage/" f " => " msg " for key '" k "'")
+         (str "storage/" f " => " msg " for key " k)
          vs))
 
 (defn mk-key [k]
-  (if (str/starts-with? k storage-id)
-    k
-    (str storage-id "_" k)))
-
-(defn now []
-  (-> (js/Date.) (.getTime)))
+  (let [k (name k)]
+    (if (str/starts-with? k storage-id)
+      k
+      (str storage-id "_" k))))
 
 (defn get-item-with-metadata [k]
   (let [k' (mk-key k)]
@@ -47,7 +45,7 @@
     (log "remove-item!" k "removed item")))
 
 (defn set-item! [k v]
-  (let [ts (now)
+  (let [ts (util/now)
         k' (mk-key k)
         v {:key k, :value v, :timestamp ts}]
     (try
@@ -70,12 +68,12 @@
    (let [num-to-remove (min 3 js/localStorage.length)]
      (util/log (str "storage/remove-oldest! => removing first "
                     num-to-remove " items"))
-     (doseq [i (range num-to-remove)
-             :let [k (js/localStorage.key i)]
+     (doseq [_i (range num-to-remove)
+             :let [k (js/localStorage.key 0)]
              :when k]
        (remove-item! k)))
-   (let [k (str "_test_" (now))
-         v (set-item!  "_")]
+   (let [k (str "_test_" (util/now))
+         v (set-item! k "_")]
      (if v
        (do
          (remove-item! k)
@@ -85,3 +83,7 @@
          (util/log (str "storage/remove-oldest! => storage still full "
                         "after attempt " (inc attempt-num)))
          (recur (inc attempt-num)))))))
+
+(defn remove-all! []
+  (doseq [item (get-all)]
+    (remove-item! (:key item))))
