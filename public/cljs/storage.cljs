@@ -1,44 +1,87 @@
 (ns transcribble.storage
   (:require [clojure.edn :as edn]
-            [transcribble.util :as util :refer [log]]))
+            [clojure.string :as str]
+            [transcribble.util :as util]))
 
 (def storage-id "transcribbleStorage")
+(def REMOVE-OLDEST-MAX-ATTEMPTS 10)
+
+(defn log [f k msg & vs]
+  (apply util/log
+         (str "storage/" f " => " msg " for key '" k "'")
+         vs))
 
 (defn mk-key [k]
-  (str storage-id "_" k))
+  (if (str/starts-with? k storage-id)
+    k
+    (str storage-id "_" k)))
 
-(defn set-item! [k v]
-  (let [now (-> (js/Date.) (.getTime))
-        k' (mk-key k)
-        v {:value v, :timestamp now}]
-    (try
-      (js/localStorage.setItem k' (pr-str v))
-      (log (str "storage/set-item! => set '" k "'") v)
-      (catch js/Error e
-        (log (str "storage/set-item! => error setting '" k "'") v e)))))
+(defn now []
+  (-> (js/Date.) (.getTime)))
 
 (defn get-item-with-metadata [k]
   (let [k' (mk-key k)]
     (if-let [v (js/localStorage.getItem k')]
-      (edn/read-string v)
-      (log (str "storage/get-item => no value for key '" k "'")))))
+      (let [v' (edn/read-string v)]
+        (log "get-item-with-metadata" k "got item" v')
+        v')
+      (log "get-item-with-metadata" k "no item"))))
 
 (defn get-item [k]
   (:value (get-item-with-metadata k)))
 
-(comment
+(defn get-all []
+  (->> (range js/localStorage.length)
+       (map (fn [i]
+              (let [k' (js/localStorage.key i)]
+                (-> (get-item-with-metadata k')
+                    (assoc :index i)
+                    (update :timestamp #(or % 0))))))
+       (sort-by :timestamp)))
 
-  (set-item! "foo" {:a 1, :b [2 3]})
+(def get-first (comp first get-all))
 
-  (get-item "foo")
-  ;; => {:a 1, :b [2 3]}
+(defn remove-item! [k]
+  (let [k' (mk-key k)]
+    (js/localStorage.removeItem k')
+    (log "remove-item!" k "removed item")))
 
-  (get-item-with-metadata "foo")
-  ;; => {:value {:a 1, :b [2 3]}, :timestamp 1730705547193}
-  ;; => :yes
+(defn set-item! [k v]
+  (let [ts (now)
+        k' (mk-key k)
+        v {:key k, :value v, :timestamp ts}]
+    (try
+      (js/localStorage.setItem k' (pr-str v))
+      (log "set-item!" k "set item" v)
+      v
+      (catch js/Error e
+        (log "set-item!" k "error setting item" v e)))))
 
-  (get-item "bar")
-  ;; => nil
-  ;; => nil
-
-  )
+(defn remove-oldest!
+  ([]
+   (remove-oldest! 0))
+  ([attempt-num]
+   (when (>= attempt-num REMOVE-OLDEST-MAX-ATTEMPTS)
+     (let [msg (str "storage/remove-oldest! => storage still full after "
+                    attempt-num " attempts")]
+       (util/log msg)
+       (throw (ex-info msg {:transcribble/error ::full
+                            ::attempts attempt-num}))))
+   (let [num-to-remove (min 3 js/localStorage.length)]
+     (util/log (str "storage/remove-oldest! => removing first "
+                    num-to-remove " items"))
+     (doseq [i (range num-to-remove)
+             :let [k (js/localStorage.key i)]
+             :when k]
+       (remove-item! k)))
+   (let [k (str "_test_" (now))
+         v (set-item!  "_")]
+     (if v
+       (do
+         (remove-item! k)
+         (util/log (str "storage/remove-oldest! => storage cleared on "
+                        "attempt " (inc attempt-num))))
+       (do
+         (util/log (str "storage/remove-oldest! => storage still full "
+                        "after attempt " (inc attempt-num)))
+         (recur (inc attempt-num)))))))
