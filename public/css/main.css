@@ -702,9 +702,8 @@ body {
 }
 
 .video-player {
-    position: absolute;
-    top: 55px;
-    left: 20px;
+    display: block;
+    margin: 50px auto 0px;
     width: calc((100% - 800px)/2);
     min-width: 200px;
     box-shadow: 0 0 5px #5881d8;
