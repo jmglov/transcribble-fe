@@ -1125,7 +1125,7 @@ body {
     padding: 50px;
     min-height: 700px;
     overflow-y: hidden;
-    color: #63b132
+    color: black;
 }
 
 #textbox b,#textbox strong {
@@ -1137,10 +1137,10 @@ body {
 }
 
 #textbox .timestamp {
-    color: #3482b1;
+    color: #5881d8;
     border-radius: 5px;
-    border-left: 2px solid #3482b1;
-    border-right: 2px solid #3482b1;
+    border-left: 2px solid #5881d8;
+    border-right: 2px solid #5881d8;
     padding: 0 3px;
     margin: 0 3px
 }
