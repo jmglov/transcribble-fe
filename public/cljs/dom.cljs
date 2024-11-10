@@ -10,7 +10,20 @@
      (get-el js/document sel)
      sel))
   ([parent sel]
-   (.querySelector parent sel)))
+   (if (string? sel)
+     (.querySelector parent sel)
+     sel)))
+
+(defn get-els
+  "Returns all elements resolved by the specified CSS selector as a seq; see
+  `get-el` for details on how the element is resolved. You may pass a parent
+   element as the first argument."
+  ([sel]
+   (if (string? sel)
+     (get-els js/document sel)
+     sel))
+  ([parent sel]
+   (seq (.querySelectorAll parent sel))))
 
 (defn add-class!
   "Adds a CSS class to the specified element or selector; see `get-el` for
